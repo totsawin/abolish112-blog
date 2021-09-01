@@ -27,24 +27,26 @@
 		});
 	});
 </script>
-<main class="activists">
-	{#each activists as activist}
-		<div class="individual">
-			<div class="individual__name">
-				{ activist.name }
+{#if activists}
+	<main class="activists">
+		{#each activists as activist}
+			<div class="individual">
+				<div class="individual__name">
+					{ activist.name }
+				</div>
+				<div class="individual__caption">      
+					<span>{ activist.detainedDays } Days Held Under Pre-Trial Detention</span>
+				</div>
+				<div class="individual__image">
+					<img src="./assets/{activist.nickname}.jpg" alt="{activist.name}"/>
+					{#if activist.detainedDuration[activist.detainedDuration.length - 1].releasedDate}
+						<div class="stamp is-bailed">ประกันตัว</div>
+					{/if}
+				</div>
 			</div>
-			<div class="individual__caption">      
-				<span>{ activist.detainedDays } Days Held Under Pre-Trial Detention</span>
-			</div>
-			<div class="individual__image">
-				<img src="./assets/{activist.nickname}.jpg" alt="{activist.name}"/>
-				{#if activist.releasedDate}
-					<div class="stamp is-bailed">Bailed</div>
-				{/if}	
-			</div>
-  		</div>
-	{/each}	  
-</main>
+		{/each}	  
+	</main>
+{/if}
 
 <style>
 	:global(body) {
