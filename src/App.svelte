@@ -1,94 +1,44 @@
 <script>
+	import { onMount } from 'svelte';
 	import { Temporal } from 'proposal-temporal/lib/index.mjs';
 	const todayDate = Temporal.now.plainDateISO();
-	const people = [
-	 {
-		  name: `Jatupat 'Pai Dao Din' Boonpatraksa`,
-		  nickname: 'pai',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 3, day: 8 }),
-		  releasedDate: Temporal.PlainDate.from({ year: 2021, month: 4, day: 23 }),
-	  },
-	  {
-		  name: `Parit 'Penguin' Chiwarak`,
-		  nickname: 'penguin',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 2, day: 9 }),
-		  releasedDate: Temporal.PlainDate.from({ year: 2021, month: 5, day: 11 }),
-	  },
-	  {
-		  name: `Panupong 'Mike' Jadnok`,
-		  nickname: 'mike',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 3, day: 8 }),
-	  },
-	  {
-		  name: `Somyot Pruksakasemsuk`,
-		  nickname: 'somyot',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 2, day: 9 }),
-		  releasedDate: Temporal.PlainDate.from({ year: 2021, month: 4, day: 23 }),
-	  },
-	  {
-		  name: `Arnon Nampa`,
-		  nickname: 'arnon',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 2, day: 9 }),
-	  },
-	  {
-		  name: `Patiwat Saraiyaem, 'Mor Lam Bank'`,
-		  nickname: 'bank',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 2, day: 9 }),
-		  releasedDate: Temporal.PlainDate.from({ year: 2021, month: 4, day: 9 }),
-	  },
-	  {
-		  name: `Panusaya Sithijirawattanakul`,
-		  nickname: 'rung',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 3, day: 8 }),
-		  releasedDate: Temporal.PlainDate.from({ year: 2021, month: 5, day: 6 }),
-	  },
-	  {
-		  name: `Chaiamorn 'Ammy' Kaewwiboonpan`,
-		  nickname: 'ammy',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 3, day: 4 }),
-		  releasedDate: Temporal.PlainDate.from({ year: 2021, month: 5, day: 11 }),
-	  },
-	  {
-		  name: `Parinya Cheewin Kulpathom aka 'Port Faiyen'`,
-		  nickname: 'port',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 3, day: 6 }),
-		  releasedDate: Temporal.PlainDate.from({ year: 2021, month: 5, day: 12 }),
-	  },
-	  {
-		  name: `Piyarat 'Toto' Jongthep`,
-		  nickname: 'toto',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 3, day: 6 }),
-		  releasedDate: Temporal.PlainDate.from({ year: 2021, month: 5, day: 5 }),
-	  },
-	  {
-		  name: `Promsorn 'Fah' Veerathamjaree`,
-		  nickname: 'fah',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 3, day: 17 }),
-		  releasedDate: Temporal.PlainDate.from({ year: 2021, month: 5, day: 10 }),
-	  },
-	  {
-		  name: `Chookiat 'Justin' Saengwong`,
-		  nickname: 'justin',
-		  detainedDate: Temporal.PlainDate.from({ year: 2021, month: 3, day: 23 }),
-	  }
-  ]
+	let activists = [];
 
-  function getNumberOfDaysUnderDetained(detainedDate, releasedDate = todayDate) {
-	return detainedDate.until(releasedDate, { largestUnit: 'days' }).days;
-  }
+	function getNumberOfDaysUnderDetained(detainedDuration) {
+		return detainedDuration.reduce((acc, {detainedDate, releasedDate }) => {
+			const detainedDateTemporal = Temporal.PlainDate.from(detainedDate);
+			const releasedDateTemporal = releasedDate ? Temporal.PlainDate.from(releasedDate): todayDate;
+			return acc + detainedDateTemporal.until(releasedDateTemporal, { largestUnit: 'days' }).days;
+			},0 );
+	}
+
+	onMount(async () => {
+		await fetch("/api/activists")
+			.then(response => response.json())
+			.then(data => {
+			activists = data.map(activist => {
+				return {
+				...activist,
+				detainedDays: getNumberOfDaysUnderDetained(activist.detainedDuration)
+				};
+			})
+			}).catch(error => {
+			console.log(error);
+		});
+	});
 </script>
-<main class="people">
-	{#each people as person}
+<main class="activists">
+	{#each activists as activist}
 		<div class="individual">
 			<div class="individual__name">
-				{ person.name }
+				{ activist.name }
 			</div>
 			<div class="individual__caption">      
-				<span>{getNumberOfDaysUnderDetained(person.detainedDate, person.releasedDate)} Days Held Under Pre-Trial Detention</span>
+				<span>{ activist.detainedDays } Days Held Under Pre-Trial Detention</span>
 			</div>
 			<div class="individual__image">
-				<img src="./assets/{person.nickname}.jpg" alt="{person.name}"/>
-				{#if person.releasedDate}
+				<img src="./assets/{activist.nickname}.jpg" alt="{activist.name}"/>
+				{#if activist.releasedDate}
 					<div class="stamp is-bailed">Bailed</div>
 				{/if}	
 			</div>
@@ -103,7 +53,7 @@
 		margin: 0;
 	}
 
-	.people {
+	.activists {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
 		column-gap: 10px;
