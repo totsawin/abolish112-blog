@@ -40,7 +40,7 @@
 				<div class="individual__image">
 					<img src="./assets/{activist.nickname}.jpg" alt="{activist.name}"/>
 					{#if activist.detainedDuration[activist.detainedDuration.length - 1].releasedDate}
-						<div class="stamp is-bailed">ประกันตัว</div>
+						<div class="stamp is-bailed">Bailed</div>
 					{/if}
 				</div>
 			</div>
