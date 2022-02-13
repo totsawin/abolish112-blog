@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
-	import { Temporal } from 'proposal-temporal/lib/index.mjs';
-	const todayDate = Temporal.now.plainDateISO();
+	import { Temporal } from '@js-temporal/polyfill';
+	const todayDate = Temporal.Now.plainDateISO();
 	let activists = [];
 
 	function getNumberOfDaysUnderDetained(detainedDuration) {
